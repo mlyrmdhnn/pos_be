@@ -13,11 +13,22 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users'); // cashier / creator
+            $table->string('order_code')->unique(); // internal order
             $table->integer('total_amount');
-            $table->string('status');
+            $table->enum('status', [
+                'draft',
+                'pending',
+                'paid',
+                'failed',
+                'expired',
+                'cancelled',
+                'refunded'
+            ]);
+            $table->string('channel'); // pos | online
             $table->timestamps();
         });
+
     }
 
     /**

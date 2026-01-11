@@ -13,13 +13,16 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id')->constrained('transactions');
-            $table->string('method');
+            $table->foreignId('transaction_id')->constrained();
+            $table->string('gateway'); // midtrans
+            $table->string('method'); // qris, gopay, bank_transfer
+            $table->string('status'); // pending, settlement, expire, deny
+            $table->string('midtrans_order_id')->unique();
             $table->integer('amount');
-            $table->string('midtrans_order_id');
             $table->json('midtrans_response');
             $table->timestamps();
         });
+
     }
 
     /**

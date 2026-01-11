@@ -4,6 +4,7 @@ use App\Services\JwtService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 
@@ -25,6 +26,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 Route::post('/refresh', [AuthController::class, 'refresh']);
 
+Route::post('/transactions', [CheckoutController::class, 'create']);
+
 Route::middleware('jwt.auth')->get('/me', function (Request $request) {
 $user = $request->attributes->get('auth_user');
 
@@ -37,10 +40,12 @@ $user = $request->attributes->get('auth_user');
     ]);
 });
 
-Route::middleware(['VerifyServerToken', 'jwt.auth'])->group(function() {
+Route::middleware(['jwt.auth','VerifyServerToken' ])->group(function() {
     Route::post('/user/create', [UserController::class, 'createUser']);
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
     Route::post('/user/update', [UserController::class, 'updateProffile']);
     Route::get('/products', [ProductController::class, 'product']);
     Route::get('/product/category', [ProductController::class, 'productCategory']);
+    Route::post('/product/create', [ProductController::class, 'create']);
+    Route::post('/product/edit', [ProductController::class, 'edit']);
 });

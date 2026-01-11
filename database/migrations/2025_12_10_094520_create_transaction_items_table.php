@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('transaction_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id')->constrained('transactions');
-            $table->foreignId('product_id')->constrained('products');
+            $table->foreignId('transaction_id')->constrained();
+            $table->foreignId('product_id')->nullable();
+            $table->string('product_name'); // snapshot
             $table->integer('qty');
-            $table->integer('price');
+            $table->integer('price'); // snapshot
             $table->integer('subtotal');
             $table->timestamps();
         });
+
     }
 
     /**
