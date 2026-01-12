@@ -26,12 +26,12 @@ class ProductController extends Controller
 
     public function create(Request $request, ProductService $service) {
         $validated = $request->validate([
-            'name' => 'required|max:255',
-            'description' => 'required|max:255',
-            'price' => 'required|numeric',
+            'name' => 'required|max:25',
+            'price' => 'required',
+            'stock' => 'required',
             'category' => 'required',
-            'stock' => 'required|numeric',
-            'image' => 'required|image'
+            'description' => 'required',
+            'image' => 'required'
         ]);
 
         $image = $request->file('image');
@@ -42,7 +42,6 @@ class ProductController extends Controller
             ]);
         }
 
-
         $product = $service->createProduct($validated, $request->file('image'));
 
         return response()->json([
@@ -50,9 +49,71 @@ class ProductController extends Controller
             'msg' => 'success create product',
             'data' => $product
         ],201);
-    }
-
-    public function edit(Request $request, ProductService $sercice) {
 
     }
+
+    public function detail($prd, ProductService $service)
+    {
+        $product = $service->detailByUuid($prd);
+
+        if(!$product)
+        {
+            return response()->json([
+                'status' => 'failed',
+                'msg' => 'product not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'ok',
+            'msg' => 'success',
+            'data' => $product
+        ], 200);
+    }
+
+    public function destroy(Request $request, ProductService $service)
+    {
+        $service->destroy($request->uuid);
+
+        return response()->json([
+            'status' => 'ok',
+            'msg' => 'success delete product'
+        ],200);
+    }
+
+
+    public function edit(Request $request, ProductService $service)
+    {
+
+        $request->validate([
+            'id' => 'required',
+            'name' => 'string',
+            'price' => 'required',
+            'quantity' => 'required',
+            'category' => 'required',
+            'image' => 'nullable'
+        ]);
+
+        $product = Product::findOrFail($request->id);
+
+        $service->editProduct(
+            $product,
+            $request->all(),
+            $request->file('image')
+        );
+
+        return response()->json([
+            'message' => 'Product updated',
+            'data'    => $product
+        ]);
+    }
+
+    public function byCategory(Request $request, ProductService $service)
+    {
+        // return response()->json([$id]);
+        return response()->json([
+            'id' => $request->id
+        ]);
+    }
+
 }

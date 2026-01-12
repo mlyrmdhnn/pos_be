@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Str;
 use App\Services\JwtService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +35,14 @@ class AuthController extends Controller
             'sub' => $user->id,
         ]);
 
+        $sessionId = Str::uuid();
+
+        $user->current_session_id = $sessionId;
+
+        $user->save();
+
+
+
         return response()
             ->json([
                 'message' => 'Login success',
@@ -63,6 +72,19 @@ class AuthController extends Controller
                     raw: false,
                     sameSite: 'Lax'
                 )
+            )
+            ->withCookie(
+               cookie(
+                name : 'session_id',
+                value : $sessionId,
+                minutes : config('app.jwt_refresh_ttl') / 60,
+                path : '/',
+                domain : null,
+                secure : false,
+                httpOnly : true,
+                raw : false,
+                sameSite : 'lax'
+               )
             );
     }
     public function refresh(Request $request, JwtService $jwt)
@@ -116,8 +138,10 @@ class AuthController extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
+
+
         return response()
             ->json([
                 'message' => 'Logged out'
@@ -137,6 +161,17 @@ class AuthController extends Controller
             ->withCookie(
                 cookie(
                     name: 'refresh_token',
+                    value: '',
+                    minutes: -1,
+                    path: '/',
+                    domain: null,
+                    secure: false,
+                    httpOnly: true,
+                    sameSite: 'Lax'
+                )
+            )->withCookie(
+                cookie(
+                    name: 'access_token',
                     value: '',
                     minutes: -1,
                     path: '/',

@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         ProductCategory::factory()->count(3)->create();
-        Product::factory()->count(12)->create();
+        Product::factory()->count(60)->create();
     }
 
 }

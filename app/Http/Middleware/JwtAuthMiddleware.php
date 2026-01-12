@@ -13,6 +13,8 @@ class JwtAuthMiddleware
     public function handle(Request $request, Closure $next)
     {
         $token = $request->cookie('access_token');
+        $sessionId = $request->cookie('session_id');
+
 
         if (! $token) {
             return response()->json([
@@ -26,6 +28,7 @@ class JwtAuthMiddleware
 
             $user = User::find($payload['sub'] ?? null);
 
+
             if (! $user) {
                 return response()->json([
                     'message' => 'User not found'
@@ -34,6 +37,13 @@ class JwtAuthMiddleware
 
             // inject user ke request (BUKAN session)
             $request->attributes->set('auth_user', $user);
+            $sessId = $user->current_session_id;
+
+            if($sessId !== $sessionId) {
+                return response()->json([
+                    'message' => 'Session Expired'
+                ], Response::HTTP_UNAUTHORIZED);
+            }
 
             return $next($request);
 
